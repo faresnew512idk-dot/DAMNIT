@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>wardrobe ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e0e;--surface:#1a1a1a;--surface2:#242424;--surface3:#2e2e2e;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#f0ede8;--muted:#888;--accent:#e8d5b0;--accent2:#c4a97d;
+  --danger:#e06060;--success:#6ec97a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#1e1a14 0%,#0e0e0e 70%)}
+.login-box{width:340px;text-align:center}
+.login-logo{font-family:'DM Serif Display',serif;font-size:44px;color:var(--accent);letter-spacing:-1px;margin-bottom:6px}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:40px;letter-spacing:3px;text-transform:uppercase}
+.login-input{width:100%;padding:14px 18px;background:var(--surface);border:0.5px solid var(--border2);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;letter-spacing:3px;text-align:center;outline:none;transition:border-color .2s;margin-bottom:12px}
+.login-input:focus{border-color:var(--accent2)}
+.login-btn{width:100%;padding:14px;background:var(--accent);color:#1a1610;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s}
+.login-btn:hover{opacity:.9}.login-btn:active{transform:scale(.98)}
+.login-error{margin-top:12px;font-size:13px;color:var(--danger);opacity:0;transition:opacity .2s}
+.login-error.show{opacity:1}
+
+/* APP */
+#app{display:none;min-height:100vh}
+.topbar{padding:18px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border);position:sticky;top:0;background:rgba(14,14,14,0.95);backdrop-filter:blur(12px);z-index:100}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.weather-badge{font-size:12px;color:var(--muted);background:var(--surface);border:0.5px solid var(--border);padding:6px 12px;border-radius:999px}
+.icon-btn{background:none;border:0.5px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:999px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .15s}
+.icon-btn:hover{color:var(--text);border-color:var(--border2)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:0.5px solid var(--border);padding:0 32px}
+.tab{padding:14px 20px;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* PAGES */
+.page{display:none;max-width:1100px;margin:0 auto;padding:32px}
+.page.active{display:block}
+@media(max-width:780px){.page{padding:20px 16px}.topbar{padding:14px 16px}.tabs{padding:0 16px}.tabs .tab{padding:12px 14px;font-size:13px}}
+
+/* SECTION */
+.section-title{font-family:'DM Serif Display',serif;font-size:24px;color:var(--accent);margin-bottom:4px}
+.section-desc{font-size:13px;color:var(--muted);margin-bottom:24px}
+
+/* WARDROBE LAYOUT */
+.wardrobe-layout{display:grid;grid-template-columns:1fr 360px;gap:28px}
+@media(max-width:780px){.wardrobe-layout{grid-template-columns:1fr}}
+
+/* UPLOAD */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:14px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface);margin-bottom:16px}
+.upload-zone:hover{border-color:var(--accent2);background:var(--surface2)}
+.upload-zone p{font-size:13px;color:var(--muted);margin-top:6px}
+.upload-zone span{color:var(--accent);font-weight:500}
+
+/* FILTERS */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filter-tab{padding:6px 14px;border-radius:999px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.filter-tab:hover{border-color:var(--border2);color:var(--text)}
+.filter-tab.active{background:var(--accent);color:#1a1610;border-color:var(--accent);font-weight:500}
+
+/* CLOTHES GRID */
+.clothes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;margin-bottom:16px}
+.cloth-item{border-radius:12px;overflow:hidden;border:2px solid transparent;position:relative;cursor:pointer;transition:all .15s;background:var(--surface2);aspect-ratio:1}
+.cloth-item:hover{border-color:var(--border2)}
+.cloth-item.selected{border-color:var(--accent)}
+.cloth-item img{width:100%;height:100%;object-fit:cover;display:block}
+.cloth-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;gap:6px}
+.cloth-item:hover .cloth-overlay,.cloth-item.selected .cloth-overlay{opacity:1}
+.cloth-item.selected .cloth-overlay{background:rgba(232,213,176,0.15)}
+.check-icon{width:26px;height:26px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a1610;font-size:13px;font-weight:700}
+.mini-btn{background:rgba(0,0,0,0.75);border:0.5px solid rgba(255,255,255,0.2);border-radius:6px;color:white;font-size:11px;padding:3px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+.mini-btn.red{background:rgba(224,96,96,0.85)}
+.cloth-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.72);font-size:10px;color:#ccc;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.color-dot{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,0.3);position:absolute;top:6px;left:6px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;border:0.5px dashed var(--border);border-radius:14px;grid-column:1/-1}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:90px;align-self:start}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}
+.card-title{font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;font-weight:500}
+
+/* VIBE */
+.vibe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vibe-btn{padding:11px 8px;border-radius:10px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;text-align:center}
+.vibe-btn:hover{border-color:var(--border2)}
+.vibe-btn.active{background:var(--accent);color:#1a1610;border-color:var(--accent);font-weight:500}
+
+/* BUTTONS */
+.gen-btn{width:100%;padding:15px;background:var(--accent);color:#1a1610;border:none;border-radius:12px;font-family:'DM Serif Display',serif;font-size:19px;cursor:pointer;transition:opacity .15s,transform .1s;margin-bottom:10px}
+.gen-btn:hover{opacity:.9}.gen-btn:active{transform:scale(.98)}
+.gen-btn:disabled{opacity:.35;cursor:not-allowed}
+.surprise-btn{width:100%;padding:11px;background:transparent;color:var(--muted);border:0.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;margin-bottom:14px}
+.surprise-btn:hover{color:var(--text);border-color:var(--border2)}
+
+/* RESULT */
+.result-card{background:var(--surface);border:0.5px solid var(--border2);border-radius:16px;padding:20px;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent);margin-bottom:3px}
+.result-vibe-tag{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.result-label{font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:500}
+.result-item{display:flex;align-items:start;gap:8px;margin-bottom:6px;font-size:13px;line-height:1.5;color:#ccc}
+.result-item::before{content:'✦';color:var(--accent2);font-size:9px;margin-top:4px;flex-shrink:0}
+.result-why{font-size:13px;line-height:1.7;color:#bbb;padding:12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--accent2)}
+.result-tip{display:flex;gap:8px;font-size:13px;line-height:1.5;color:#bbb;margin-bottom:7px;padding:8px 10px;background:var(--surface2);border-radius:8px}
+.tip-num{color:var(--accent);font-weight:500;flex-shrink:0;min-width:18px}
+.result-divider{border:none;border-top:0.5px solid var(--border);margin:13px 0}
+.result-verdict{font-size:13px;color:var(--muted);font-style:italic}
+.fav-btn{background:none;border:0.5px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .15s;margin-top:12px;width:100%}
+.fav-btn:hover{color:var(--accent);border-color:var(--accent)}
+.fav-btn.saved{color:var(--accent);border-color:var(--accent);background:rgba(232,213,176,0.08)}
+.loading-dots span{display:inline-block;animation:pulse 1.2s infinite;color:var(--accent2);font-size:22px}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+/* SEL COUNT */
+.sel-count{font-size:12px;color:var(--muted);margin-bottom:10px}
+.sel-count span{color:var(--accent);font-weight:500}
+.clear-sel{background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;padding:0;margin-left:6px}
+.clear-sel:hover{color:var(--text)}
+
+/* HISTORY / FAVS */
+.history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.history-card{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:16px;transition:border-color .15s}
+.history-card:hover{border-color:var(--border2)}
+.history-card-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--accent);margin-bottom:3px}
+.history-date{font-size:11px;color:var(--muted);margin-bottom:8px}
+.history-vibe{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;background:var(--surface2);color:var(--muted);border:0.5px solid var(--border);margin-bottom:10px}
+.history-why{font-size:12px;line-height:1.6;color:#999;margin-bottom:10px}
+.history-actions{display:flex;gap:8px}
+.h-btn{flex:1;padding:7px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.h-btn:hover{color:var(--text);border-color:var(--border2)}
+.h-btn.fav{color:var(--accent);border-color:var(--accent)}
+.h-btn.del:hover{color:var(--danger);border-color:var(--danger)}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+@media(max-width:600px){.cal-grid{grid-template-columns:repeat(4,1fr)}}
+.cal-day{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s;min-height:80px}
+.cal-day:hover{border-color:var(--border2)}
+.cal-day.today{border-color:var(--accent2)}
+.cal-day-name{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.cal-day-num{font-size:18px;font-family:'DM Serif Display',serif;color:var(--accent);margin-bottom:5px}
+.cal-outfit-name{font-size:10px;color:#aaa;line-height:1.3}
+.cal-empty{font-size:10px;color:var(--border2)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal-box{background:var(--surface);border:0.5px solid var(--border2);border-radius:16px;padding:24px;width:100%;max-width:380px}
+.modal-box.wide{max-width:480px;max-height:80vh;overflow-y:auto}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent);margin-bottom:16px}
+.modal-input{width:100%;padding:12px 14px;background:var(--surface2);border:0.5px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:12px}
+.modal-input:focus{border-color:var(--accent2)}
+.modal-actions{display:flex;gap:8px;margin-top:12px}
+.modal-btn{flex:1;padding:11px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .15s}
+.modal-btn.primary{background:var(--accent);color:#1a1610;border-color:var(--accent);font-weight:500}
+.modal-btn:hover{color:var(--text);border-color:var(--border2)}
+.modal-btn.danger:hover{color:var(--danger);border-color:var(--danger)}
+
+/* COLOR PICKER */
+.color-picker-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.cp{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.cp:hover,.cp.active{border-color:white;transform:scale(1.15)}
+
+/* OUTFIT OPTIONS */
+.outfit-option{padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px;cursor:pointer;border:0.5px solid transparent;transition:all .15s}
+.outfit-option:hover{border-color:var(--accent2)}
+.outfit-option.picked{border-color:var(--accent);background:rgba(232,213,176,0.08)}
+.outfit-option-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
+.outfit-option-vibe{font-size:11px;color:var(--muted)}
+
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">wardrobe</div>
+    <div class="login-sub">your personal stylist</div>
+    <input class="login-input" type="password" id="pw-input" placeholder="enter password" autocomplete="off">
+    <button class="login-btn" onclick="tryLogin()">enter</button>
+    <div class="login-error" id="login-error">wrong password, try again</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">wardrobe ✦</div>
+    <div class="topbar-right">
+      <div class="weather-badge" id="weather-badge">📍 locating...</div>
+      <button class="icon-btn" onclick="logout()">lock</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('wardrobe',this)">wardrobe</button>
+    <button class="tab" onclick="showPage('history',this)">history</button>
+    <button class="tab" onclick="showPage('favorites',this)">favorites</button>
+    <button class="tab" onclick="showPage('calendar',this)">calendar</button>
+  </div>
+
+  <!-- WARDROBE -->
+  <div class="page active" id="page-wardrobe">
+    <div class="wardrobe-layout">
+      <div>
+        <div class="section-title">my wardrobe</div>
+        <div class="section-desc">upload clothes, select pieces, then generate your look →</div>
+        <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div style="font-size:30px">🧥</div>
+          <p><span>tap to upload clothes</span></p>
+          <p>jpg, png, webp — as many as you want</p>
+        </div>
+        <input type="file" id="file-input" multiple accept="image/*">
+        <div class="filter-row">
+          <button class="filter-tab active" onclick="setFilter('all',this)">all</button>
+          <button class="filter-tab" onclick="setFilter('tops',this)">tops</button>
+          <button class="filter-tab" onclick="setFilter('bottoms',this)">bottoms</button>
+          <button class="filter-tab" onclick="setFilter('outerwear',this)">outerwear</button>
+          <button class="filter-tab" onclick="setFilter('shoes',this)">shoes</button>
+          <button class="filter-tab" onclick="setFilter('accessories',this)">accessories</button>
+        </div>
+        <div id="clothes-count" style="font-size:12px;color:var(--muted);margin-bottom:10px"></div>
+        <div class="clothes-grid" id="clothes-grid"></div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-title">vibe for today</div>
+          <div class="vibe-grid">
+            <button class="vibe-btn active" data-v="sunny" onclick="setVibe('sunny',this)">☀️ sunny</button>
+            <button class="vibe-btn" data-v="cold" onclick="setVibe('cold',this)">🧥 cold</button>
+            <button class="vibe-btn" data-v="winter" onclick="setVibe('winter',this)">❄️ winter</button>
+            <button class="vibe-btn" data-v="fun" onclick="setVibe('fun',this)">🎉 fun night</button>
+          </div>
+        </div>
+        <div class="sel-count" id="sel-count"></div>
+        <button class="gen-btn" id="gen-btn" onclick="generateOutfit()" disabled>style me ✦</button>
+        <button class="surprise-btn" onclick="surpriseMe()">🎲 surprise me — pick random items</button>
+        <div id="result-area"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="page-history">
+    <div class="section-title">outfit history</div>
+    <div class="section-desc">every look the AI has generated for you</div>
+    <div class="history-grid" id="history-grid"></div>
+  </div>
+
+  <!-- FAVORITES -->
+  <div class="page" id="page-favorites">
+    <div class="section-title">favorites ♥</div>
+    <div class="section-desc">looks you loved and saved</div>
+    <div class="history-grid" id="favorites-grid"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="page" id="page-calendar">
+    <div class="section-title">outfit calendar</div>
+    <div class="section-desc">plan your looks for the week — tap a day to assign an outfit</div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="modal-overlay" id="rename-modal" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">edit item</div>
+    <input class="modal-input" id="rename-input" type="text" placeholder="item name">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">color tag</div>
+    <div class="color-picker-row" id="color-picker"></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">category</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px" id="cat-picker"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeRenameModal()">cancel</button>
+      <button class="modal-btn primary" onclick="saveRename()">save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR MODAL -->
+<div class="modal-overlay" id="cal-modal" style="display:none">
+  <div class="modal-box wide">
+    <div class="modal-title" id="cal-modal-title">pick an outfit</div>
+    <div id="cal-modal-list"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="document.getElementById('cal-modal').style.display='none'">cancel</button>
+      <button class="modal-btn danger" onclick="clearCalDay()">clear day</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASS='fares123';
+const SK={clothes:'wrd_clothes_v3',history:'wrd_hist_v3',favs:'wrd_favs_v3',cal:'wrd_cal_v3'};
+const COLORS=[
+  {name:'white',hex:'#f0f0f0'},{name:'black',hex:'#2a2a2a'},{name:'gray',hex:'#888'},
+  {name:'navy',hex:'#1e3a5f'},{name:'blue',hex:'#3a7bd5'},{name:'red',hex:'#cc4444'},
+  {name:'pink',hex:'#e88aaa'},{name:'green',hex:'#4a9e6b'},{name:'yellow',hex:'#d4b842'},
+  {name:'brown',hex:'#8b5e3c'},{name:'beige',hex:'#c8b89a'},{name:'orange',hex:'#d4763b'},{name:'purple',hex:'#7c5cbf'}
+];
+const CATS=['tops','bottoms','outerwear','shoes','accessories'];
+const VIBE_MAP={
+  sunny:'a sunny warm day, bright and breezy outdoor look',
+  cold:'a cold day, needs warmth but very stylish',
+  winter:'full winter, cozy layered fashionable look',
+  fun:'a fun night out, bold expressive turning heads'
+};
+
+let clothes=[], history=[], favs=[], calPlan={};
+let selectedIds=new Set(), currentFilter='all', currentVibe='sunny';
+let renameId=null, renameColor='', renameCat='tops', calDay=null;
+
+// AUTH
+function tryLogin(){
+  if(document.getElementById('pw-input').value===PASS){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadAll(); fetchWeather();
+  } else {
+    const e=document.getElementById('login-error');
+    e.classList.add('show');
+    document.getElementById('pw-input').value='';
+    setTimeout(()=>e.classList.remove('show'),2500);
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
+function logout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pw-input').value='';
+  selectedIds.clear();
+  document.getElementById('result-area').innerHTML='';
+}
+
+// WEATHER
+function fetchWeather(){
+  if(!navigator.geolocation){document.getElementById('weather-badge').textContent='🌍 no location';return}
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    try{
+      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&current_weather=true`);
+      const d=await r.json();
+      const t=Math.round(d.current_weather.temperature);
+      const wc=d.current_weather.weathercode;
+      let icon=wc===0?'☀️':wc<=3?'⛅':wc<=67?'🌧️':wc<=77?'❄️':'⛈️';
+      document.getElementById('weather-badge').textContent=`${icon} ${t}°C`;
+      const suggestedVibe=t>=25?'sunny':t>=15?'cold':'winter';
+      currentVibe=suggestedVibe;
+      document.querySelectorAll('.vibe-btn').forEach(b=>{
+        b.classList.toggle('active',b.dataset.v===suggestedVibe);
+      });
+    }catch(e){document.getElementById('weather-badge').textContent='🌍 —'}
+  },()=>{document.getElementById('weather-badge').textContent='🌍 —'});
+}
+
+// STORAGE
+function loadAll(){
+  clothes=JSON.parse(localStorage.getItem(SK.clothes)||'[]');
+  history=JSON.parse(localStorage.getItem(SK.history)||'[]');
+  favs=JSON.parse(localStorage.getItem(SK.favs)||'[]');
+  calPlan=JSON.parse(localStorage.getItem(SK.cal)||'{}');
+  renderGrid(); renderHistory(); renderFavs(); renderCalendar();
+}
+function sv(key,val){localStorage.setItem(key,JSON.stringify(val))}
+
+// TABS
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='history')renderHistory();
+  if(id==='favorites')renderFavs();
+  if(id==='calendar')renderCalendar();
+}
+
+// UPLOAD
+document.getElementById('file-input').addEventListener('change',e=>handleFiles(e.target.files));
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--accent)'});
+dz.addEventListener('dragleave',()=>dz.style.borderColor='rgba(255,255,255,0.15)');
+dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='rgba(255,255,255,0.15)';handleFiles(e.dataTransfer.files)});
+
+function handleFiles(files){
+  Array.from(files).forEach(file=>{
+    if(!file.type.startsWith('image/'))return;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const id='c'+Date.now()+Math.random().toString(36).slice(2);
+      const name=file.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+      clothes.push({id,name,data:e.target.result,category:guessCat(file.name),color:''});
+      sv(SK.clothes,clothes); renderGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function guessCat(n){
+  n=n.toLowerCase();
+  if(/shirt|top|blouse|tee|crop|tank|hoodie|sweat|polo/.test(n))return'tops';
+  if(/pant|jean|trouser|skirt|short|legging/.test(n))return'bottoms';
+  if(/jacket|coat|blazer|cardigan|vest/.test(n))return'outerwear';
+  if(/shoe|sneaker|boot|heel|sandal|loafer/.test(n))return'shoes';
+  if(/bag|hat|scarf|belt|watch|glasses/.test(n))return'accessories';
+  return'tops';
+}
+
+function deleteItem(id){
+  clothes=clothes.filter(c=>c.id!==id);
+  selectedIds.delete(id);
+  sv(SK.clothes,clothes); renderGrid(); updateSelCount();
+}
+
+function toggleSelect(id){
+  selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id);
+  renderGrid(); updateSelCount();
+}
+function clearSelection(){selectedIds.clear();renderGrid();updateSelCount()}
+
+// RENAME
+function openRenameModal(id){
+  renameId=id;
+  const c=clothes.find(x=>x.id===id);
+  document.getElementById('rename-input').value=c.name;
+  renameColor=c.color||''; renameCat=c.category||'tops';
+  document.getElementById('color-picker').innerHTML=COLORS.map(col=>`<div class="cp${renameColor===col.name?' active':''}" style="background:${col.hex}" title="${col.name}" onclick="pickColor('${col.name}',this)"></div>`).join('');
+  document.getElementById('cat-picker').innerHTML=CATS.map(cat=>`<button class="filter-tab${renameCat===cat?' active':''}" onclick="pickCat('${cat}',this)">${cat}</button>`).join('');
+  document.getElementById('rename-modal').style.display='flex';
+}
+function pickColor(name,el){renameColor=name;document.querySelectorAll('#color-picker .cp').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+function pickCat(cat,el){renameCat=cat;document.querySelectorAll('#cat-picker .filter-tab').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+function saveRename(){
+  const c=clothes.find(x=>x.id===renameId);
+  if(c){c.name=document.getElementById('rename-input').value||c.name;c.color=renameColor;c.category=renameCat;}
+  sv(SK.clothes,clothes); closeRenameModal(); renderGrid();
+}
+function closeRenameModal(){document.getElementById('rename-modal').style.display='none'}
+
+// RENDER WARDROBE
+function renderGrid(){
+  const grid=document.getElementById('clothes-grid');
+  const filtered=currentFilter==='all'?clothes:clothes.filter(c=>c.category===currentFilter);
+  document.getElementById('clothes-count').textContent=clothes.length?`${clothes.length} item${clothes.length!==1?'s':''} saved`:'';
+  if(!clothes.length){grid.innerHTML=`<div class="empty-state"><div style="font-size:32px;margin-bottom:8px">🧺</div>your wardrobe is empty — upload your first piece!</div>`;return}
+  if(!filtered.length){grid.innerHTML=`<div class="empty-state">no items in this category yet</div>`;return}
+  grid.innerHTML=filtered.map(c=>{
+    const col=COLORS.find(x=>x.name===c.color);
+    return`<div class="cloth-item${selectedIds.has(c.id)?' selected':''}" onclick="toggleSelect('${c.id}')">
+      <img src="${c.data}" alt="${c.name}" loading="lazy">
+      ${col?`<div class="color-dot" style="background:${col.hex}" title="${col.name}"></div>`:''}
+      <div class="cloth-label">${c.name}</div>
+      <div class="cloth-overlay">
+        ${selectedIds.has(c.id)?'<div class="check-icon">✓</div>':''}
+        <button class="mini-btn" onclick="event.stopPropagation();openRenameModal('${c.id}')">edit</button>
+        <button class="mini-btn red" onclick="event.stopPropagation();deleteItem('${c.id}')">delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('gen-btn').disabled=selectedIds.size<2;
+}
+
+function updateSelCount(){
+  const el=document.getElementById('sel-count');
+  el.innerHTML=selectedIds.size?`<span>${selectedIds.size}</span> item${selectedIds.size!==1?'s':''} selected <button class="clear-sel" onclick="clearSelection()">clear</button>`:'';
+  document.getElementById('gen-btn').disabled=selectedIds.size<2;
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-row .filter-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderGrid();
+}
+function setVibe(v,btn){
+  currentVibe=v;
+  document.querySelectorAll('.vibe-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// SURPRISE
+function surpriseMe(){
+  if(clothes.length<2){alert('upload at least 2 items first!');return}
+  const picks=[...clothes].sort(()=>Math.random()-.5).slice(0,Math.min(4,clothes.length));
+  selectedIds=new Set(picks.map(c=>c.id));
+  renderGrid(); updateSelCount();
+}
+
+// GENERATE
+async function generateOutfit(){
+  if(selectedIds.size<2)return;
+  const selected=clothes.filter(c=>selectedIds.has(c.id));
+  const btn=document.getElementById('gen-btn');
+  const area=document.getElementById('result-area');
+  btn.disabled=true; btn.textContent='styling...';
+  area.innerHTML=`<div style="text-align:center;padding:32px 0"><div class="loading-dots"><span>•</span><span>•</span><span>•</span></div><p style="font-size:13px;color:var(--muted);margin-top:12px">studying your wardrobe...</p></div>`;
+
+  const itemList=selected.map((c,i)=>`Item ${i+1}: ${c.name} (category: ${c.category}${c.color?', color: '+c.color:''})`).join('\n');
+  const prompt=`You are a high-end professional fashion stylist. Your client selected:\n\n${itemList}\n\nOccasion: ${VIBE_MAP[currentVibe]}\n\nAnalyze like a real stylist. Respond ONLY in JSON, no markdown:\n{"outfit_name":"creative name max 5 words","selected_pieces":["piece with styling note","piece with styling note","piece with styling note"],"why_it_works":"2-3 sentences on color harmony and silhouette balance","pro_tips":["specific pro tip 1","specific pro tip 2","specific pro tip 3"],"vibe_verdict":"one sentence on how it nails the vibe"}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    const o=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const hid='h'+Date.now();
+    const entry={id:hid,outfit_name:o.outfit_name,vibe:currentVibe,why_it_works:o.why_it_works,selected_pieces:o.selected_pieces,pro_tips:o.pro_tips,vibe_verdict:o.vibe_verdict,date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
+    history.unshift(entry); if(history.length>60)history=history.slice(0,60);
+    sv(SK.history,history);
+    area.innerHTML=`<div class="result-card">
+      <div class="result-title">${o.outfit_name}</div>
+      <div class="result-vibe-tag">${currentVibe} look</div>
+      <div class="result-label">the pieces</div>
+      ${o.selected_pieces.map(p=>`<div class="result-item">${p}</div>`).join('')}
+      <hr class="result-divider">
+      <div class="result-label">why it works</div>
+      <div class="result-why">${o.why_it_works}</div>
+      <hr class="result-divider">
+      <div class="result-label">stylist tips</div>
+      ${o.pro_tips.map((t,i)=>`<div class="result-tip"><span class="tip-num">${i+1}.</span><span>${t}</span></div>`).join('')}
+      <hr class="result-divider">
+      <div class="result-verdict">✦ ${o.vibe_verdict}</div>
+      <button class="fav-btn" id="fb-${hid}" onclick="toggleFav('${hid}')">♥ save to favorites</button>
+    </div>`;
+  }catch(e){
+    area.innerHTML=`<div class="result-card"><p style="color:var(--danger);font-size:14px">couldn't generate — check connection and try again</p></div>`;
+  }
+  btn.disabled=false; btn.innerHTML='style me ✦';
+}
+
+// FAVS
+function isFav(id){return favs.some(f=>f.id===id)}
+function toggleFav(hid){
+  const entry=history.find(h=>h.id===hid);
+  if(!entry)return;
+  const idx=favs.findIndex(f=>f.id===hid);
+  const btn=document.getElementById('fb-'+hid);
+  if(idx>-1){favs.splice(idx,1);if(btn){btn.textContent='♥ save to favorites';btn.classList.remove('saved')}}
+  else{favs.unshift(entry);if(btn){btn.textContent='♥ saved!';btn.classList.add('saved')}}
+  sv(SK.favs,favs);
+}
+
+// RENDER HISTORY
+function renderHistory(){
+  const g=document.getElementById('history-grid');
+  if(!history.length){g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div style="font-size:32px;margin-bottom:8px">📋</div>no outfits generated yet</div>`;return}
+  g.innerHTML=history.map(h=>`<div class="history-card">
+    <div class="history-card-title">${h.outfit_name}</div>
+    <div class="history-date">${h.date}</div>
+    <div class="history-vibe">${h.vibe}</div>
+    <div class="history-why">${h.why_it_works}</div>
+    <div class="history-actions">
+      <button class="h-btn${isFav(h.id)?' fav':''}" onclick="toggleFavH('${h.id}',this)">${isFav(h.id)?'♥ saved':'♥ fav'}</button>
+      <button class="h-btn del" onclick="deleteHistory('${h.id}')">delete</button>
+    </div>
+  </div>`).join('');
+}
+function toggleFavH(hid,btn){
+  const idx=favs.findIndex(f=>f.id===hid);
+  if(idx>-1){favs.splice(idx,1);btn.textContent='♥ fav';btn.classList.remove('fav')}
+  else{const e=history.find(h=>h.id===hid);if(e)favs.unshift(e);btn.textContent='♥ saved';btn.classList.add('fav')}
+  sv(SK.favs,favs); renderFavs();
+}
+function deleteHistory(hid){
+  history=history.filter(h=>h.id!==hid);
+  favs=favs.filter(f=>f.id!==hid);
+  sv(SK.history,history); sv(SK.favs,favs);
+  renderHistory(); renderFavs();
+}
+
+// RENDER FAVS
+function renderFavs(){
+  const g=document.getElementById('favorites-grid');
+  if(!favs.length){g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div style="font-size:32px;margin-bottom:8px">♥</div>no favorites yet — generate looks and save the ones you love</div>`;return}
+  g.innerHTML=favs.map(h=>`<div class="history-card">
+    <div class="history-card-title">${h.outfit_name}</div>
+    <div class="history-date">${h.date}</div>
+    <div class="history-vibe">${h.vibe}</div>
+    <div class="history-why">${h.why_it_works}</div>
+    <div style="margin-bottom:10px">${(h.pro_tips||[]).map((t,i)=>`<div class="result-tip" style="margin-bottom:5px"><span class="tip-num">${i+1}.</span><span style="font-size:12px">${t}</span></div>`).join('')}</div>
+    <div class="history-actions">
+      <button class="h-btn fav del" onclick="removeFav('${h.id}')">♥ remove</button>
+    </div>
+  </div>`).join('');
+}
+function removeFav(hid){favs=favs.filter(f=>f.id!==hid);sv(SK.favs,favs);renderFavs();renderHistory()}
+
+// CALENDAR
+function renderCalendar(){
+  const g=document.getElementById('cal-grid');
+  const today=new Date();
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  g.innerHTML=days.map((day,i)=>{
+    const d=new Date(today);
+    d.setDate(today.getDate()-today.getDay()+i);
+    const key=d.toISOString().slice(0,10);
+    const isToday=d.toDateString()===today.toDateString();
+    const assigned=calPlan[key];
+    return`<div class="cal-day${isToday?' today':''}" onclick="openCalModal('${key}','${day}')">
+      <div class="cal-day-name">${day}</div>
+      <div class="cal-day-num">${d.getDate()}</div>
+      ${assigned?`<div class="cal-outfit-name">${assigned.outfit_name}</div>`:`<div class="cal-empty">+ outfit</div>`}
+    </div>`;
+  }).join('');
+}
+function openCalModal(day,dayName){
+  calDay=day;
+  document.getElementById('cal-modal-title').textContent=`pick outfit for ${dayName}`;
+  const list=document.getElementById('cal-modal-list');
+  if(!history.length){list.innerHTML=`<p style="font-size:13px;color:var(--muted)">no outfits yet — generate some first!</p>`}
+  else{list.innerHTML=history.map(h=>`<div class="outfit-option${calPlan[day]&&calPlan[day].id===h.id?' picked':''}" onclick="assignOutfit('${h.id}')"><div class="outfit-option-name">${h.outfit_name}</div><div class="outfit-option-vibe">${h.vibe} · ${h.date}</div></div>`).join('')}
+  document.getElementById('cal-modal').style.display='flex';
+}
+function assignOutfit(hid){
+  const e=history.find(h=>h.id===hid);
+  if(e&&calDay){calPlan[calDay]=e;sv(SK.cal,calPlan)}
+  document.getElementById('cal-modal').style.display='none';
+  renderCalendar();
+}
+function clearCalDay(){
+  if(calDay)delete calPlan[calDay];
+  sv(SK.cal,calPlan);
+  document.getElementById('cal-modal').style.display='none';
+  renderCalendar();
+}
+</script>
+</body>
+</html>
